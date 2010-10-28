@@ -1,0 +1,20 @@
+#!/bin/bash
+XMONADHS="/home/med/.xmonad/xmonad.hs"
+
+SRCH=".*"
+if [ -n "$1" ]; then
+	SRCH="$1"
+fi
+
+EZCONF=`grep -i ezconfig "${XMONADHS}"`
+if [ -z "${EZCONF}" ]; then
+	echo "EZConfig not imported.  Unable to parse keymap."
+	exit -1
+fi
+
+grep "M-${SRCH}" "${XMONADHS}" |\
+grep -v '^--' |\
+sed -e 's/\".*M-\([A-Za-z\>\<0-9\-]\+\)\"\ *,/\1\t/g' |\
+sed -e 's/(\|)\|\(,\ *$\)//g' |\
+sort -bi
+
