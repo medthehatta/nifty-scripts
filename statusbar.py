@@ -164,7 +164,7 @@ def dz_wifi():
 		if r[0]==0: return i("net_wired","green")+"^fg(white) "+r[1]
 		if r[0]==1: return i("wifi_02","green")+"^fg(white) "+r[1]
 	else:
-		return i("empty","")
+		return "offline"
 
 
 def dz_volume():
