@@ -4,8 +4,8 @@ from math import *
 import subprocess
 import time
 
-
-icon_dir="~/scripts/icons"
+home_dir="/home/med"
+icon_dir=home_dir+"/scripts/icons"
 
 #shameless hack to try and get the battery to work more accurately
 #(basically going to track all the rate measurements in a global variable
@@ -60,7 +60,7 @@ def battery_remaining():
 
 
 def new_mail():
-	mail_dir="~/mail"
+	mail_dir=home_dir+"/mail"
 	def count_instances(rex,mailbox): 
 		return int(cmd([["grep",rex,mail_dir+"/"+mailbox],["wc","-l"]]).strip())
 	
@@ -195,8 +195,8 @@ def dz_mail():
 	return i("mail",color)+boxdisp
 
 def dz_downloaded():
-	numfiles = len(os.listdir("~/downloaded"))
-	movedfiles = len([f for f in os.listdir("~/downloaded") if re.match(r'.*\.moved$',f)])
+	numfiles = len(os.listdir(home_dir+"/downloaded"))
+	movedfiles = len([f for f in os.listdir(home_dir+"/downloaded") if re.match(r'.*\.moved$',f)])
 	if numfiles > 0:
 		if numfiles < 10: 
 			color = "blue"
