@@ -76,9 +76,9 @@ def new_mail():
 def wifi_online():
 	nic="eth0"
 	wifi="wlan0"
-	rex = re.compile(r'inet addr:(.*)')
-	raw_nic = cmd([["ifconfig",nic],["grep","-io","inet addr:[0-9\\.]\+"]]).strip()
-	raw_wifi = cmd([["ifconfig",wifi],["grep","-io","inet addr:[0-9\\.]\+"]]).strip()
+	rex = re.compile(r'inet addr:([^\ ]*)')
+	raw_nic = cmd([["ifconfig",nic]]).strip()
+	raw_wifi = cmd([["ifconfig",wifi]]).strip()
 	m_nic = rex.search(raw_nic)
 	m_wifi = rex.search(raw_wifi)
 	if m_nic: return (0,m_nic.groups()[0])
