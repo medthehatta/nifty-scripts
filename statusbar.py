@@ -74,13 +74,16 @@ def new_mail():
 
 
 def wifi_online():
-	raw = cmd([["iwconfig"],["grep","-io","essid:\".*\""]]).strip()
-	rex = re.compile(r'ESSID:"(.*)"')
-	m = rex.search(raw)
-	if m:
-		return rex.search(raw).groups()[0]
-	else:
-		return ""
+	nic="eth0"
+	wifi="wlan0"
+	rex = re.compile(r'inet addr:(.*)')
+	raw_nic = cmd([["ifconfig",nic],["grep","-io","inet addr:[0-9\\.]\+"]]).strip()
+	raw_wifi = cmd([["ifconfig",wifi],["grep","-io","inet addr:[0-9\\.]\+"]]).strip()
+	m_nic = rex.search(raw_nic)
+	m_wifi = rex.search(raw_wifi)
+	if m_nic: return (0,m_nic.groups()[0])
+	if m_wifi: return (1,m_wifi.groups()[0])
+	if not (m_nic or m_wifi): return None
 
 
 
@@ -157,10 +160,11 @@ def dz_battery():
 
 def dz_wifi():
 	r = wifi_online()
-	if r:
-		return i("wifi_02","green")+"^fg(white) "+r
+	if r: 
+		if r[0]==0: return i("net_wired","green")+"^fg(white) "+r[1]
+		if r[0]==1: return i("wifi_02","green")+"^fg(white) "+r[1]
 	else:
-		return i("wifi_02","")
+		return i("empty","")
 
 
 def dz_volume():
