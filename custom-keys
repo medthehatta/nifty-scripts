@@ -1,5 +1,5 @@
 #!/bin/bash
-XMONADHS="~/dotfiles/xmonad.hs"
+XMONADHS="/home/med/dotfiles/xmonad.hs"
 
 SRCH=".*"
 if [ -n "$1" ]; then
