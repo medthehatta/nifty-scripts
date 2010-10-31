@@ -28,6 +28,7 @@ def main():
 FILEMAP = {has_ext("torrent"):"/mnt/smb-seed/torrents"
 	  ,has_ext("(jpg|jpeg|tif|tiff|png|bmp)"):"/home/med/pics"
 	  ,has_ext("gif"):"/home/med/pics/gifs"
+	  ,has_ext("(pdf|doc)"):"/home/med/docs"
 	  }
 
 if __name__ == "__main__":
