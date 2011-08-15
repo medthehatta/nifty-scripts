@@ -16,7 +16,6 @@ def move_downloaded(dl,mapping):
 			print("Moving %s to %s" % (f,mapping[matchexps[0]]))
 			try:
 				shutil.copyfile(dl+os.path.sep+f,mapping[matchexps[0]]+os.path.sep+f)
-				shutil.move(dl+os.path.sep+f,dl+os.path.sep+f+".moved")
 			except IOError:
 				print("Copy failed for %s" % f)	
 

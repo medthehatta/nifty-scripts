@@ -3,6 +3,7 @@ import os
 from math import *
 import subprocess
 import time
+import shutil
 
 home_dir="/home/med"
 icon_dir=home_dir+"/scripts/icons"
@@ -59,6 +60,11 @@ def battery_remaining():
 	return (state,100*leftH/5053.,floor(timeleft),floor(60*(timeleft-floor(timeleft))))
 
 
+def irssi_notifications():
+	raw = open("/tmp/med_irssi_pipe").readlines()
+	return [r.split("\t") for r in raw]
+
+
 def new_mail():
 	mail_dir=home_dir+"/mail"
 	def count_instances(rex,mailbox): 
@@ -85,7 +91,20 @@ def wifi_online():
 	if m_wifi: return (1,m_wifi.groups()[0])
 	if not (m_nic or m_wifi): return None
 
+def time_to_minutes(s):
+	sp = map(int, reversed( s.split(":") ))
+	return sp[0] + sum( [60*a for a in sp[1:]] )
 
+def xmms2_status():
+	rex = re.compile(r'([A-Za-z]+): (.+): ([0-9]+:[0-9]+) of ([0-9]+:[0-9]+)')
+	raw = cmd([["nyxmms2","status"]]).strip()
+	m = rex.search(raw)
+	if m: 
+		(status,song,current,final) = m.groups()
+		duration = time_to_minutes(final)
+		progress = time_to_minutes(current)
+		return (status,song,progress,duration)
+	return None
 
 ##################################
 # FUNCTIONS FOR PRINTING TO DZEN #
@@ -149,8 +168,8 @@ def dz_battery():
 	(state,percent,hours,minutes) = battery_remaining()
 	if state == "discharging":
 		if percent >= 0: color = "red"
-		if percent > 30: color = "yellow"
-		if percent > 60: color = "green"
+		if percent > 25: color = "yellow"
+		if percent > 50: color = "green"
 		
 		return i("bat_empty_01","white")+" "+pbar(percent,color)+" %02d%% (%02d:%02d)"%(int(percent),int(hours),int(minutes))
 	if state == "charging":	
@@ -176,7 +195,7 @@ def dz_volume():
 		
 		return i("spkr_01","green")+" "+pbar(percent,color)
 	else:
-		return i("spkr_01","")+" "+pbar(percent,"") #add fully charged or charging?
+		return i("spkr_01","")+" "+pbar(percent,"") 
 
 
 def dz_date():
@@ -214,7 +233,27 @@ def dz_downloaded():
 		else:
 			return i("diskette","white")
 
+def dz_xmms2():
+	r = xmms2_status()
+	if not r: return i("note","")
 
-ITEMS=[("downloaded",dz_downloaded,30),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
+	if r[0] == "Playing":
+		color = "green"
+		color2 = "white"
+	elif r[0] == "Stopped":
+		color = ""
+		color2 = ""
+	else:
+		color = "white"
+		color2 = ""
+
+	percent = int(r[2]/float(r[3])*100)
+	progress = 4 - int(percent / 25)
+
+	return i("note",color) +" ^fg("+color2+")"+ r[1] + " " + progress*"." + (4-progress)*" "
+
+
+
+ITEMS=[("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
 
 dzen_go(ITEMS)
