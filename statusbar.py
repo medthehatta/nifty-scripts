@@ -3,6 +3,7 @@ import os
 from math import *
 import subprocess
 import time
+import datetime
 import shutil
 
 home_dir="/home/med"
@@ -97,7 +98,7 @@ def time_to_minutes(s):
 
 def xmms2_status():
 	rex = re.compile(r'([A-Za-z]+): (.+): ([0-9]+:[0-9]+) of ([0-9]+:[0-9]+)')
-	raw = cmd([["nyxmms2","status"]]).strip()
+	raw = cmd([["nyxmms2","current"]]).strip()
 	m = rex.search(raw)
 	if m: 
 		(status,song,current,final) = m.groups()
@@ -105,6 +106,31 @@ def xmms2_status():
 		progress = time_to_minutes(current)
 		return (status,song,progress,duration)
 	return None
+
+def time_diff(t1,t2):
+	print "Delta t: %s - %s" % (t1,t2)
+	ts1 = [int(t) for t in t1.split(":")]
+	ts2 = [int(t) for t in t2.split(":")]
+	tsp1 = 60*ts1[0]+ts1[1] 
+	tsp2 = 60*ts2[0]+ts2[1] 
+	return tsp1-tsp2
+
+def next_prayer():
+	prayers = ["Fajr","Shorooq","Zuhr","Asr","Maghrib","Isha"]
+	times = cmd([["ipraytime","-b"],["tail","-n1"],["tr","-s"," "]]).split(" ")
+	now = datetime.datetime.today().strftime("%H:%M")
+	deltas = [time_diff(a,now) for a in times[2:]]
+
+	data = zip(prayers,times[2:],deltas)
+	next = [d for d in data if d[2]>0]
+
+	if next:
+		return next[0]
+	else:
+		return None
+
+
+
 
 ##################################
 # FUNCTIONS FOR PRINTING TO DZEN #
@@ -175,7 +201,7 @@ def dz_battery():
 	if state == "charging":	
 		return i("ac","")+" "+pbar(percent,"black")+" %02d%% (--:--)" % (int(percent),)
 	if state == "charged":
-		return i("ac","green")+" "+pbar(percent,"green")+" %02d%% (--:--)" % (int(percent),)
+		return i("ac","")+" %02d%%" % (int(percent),)
 
 def dz_wifi():
 	r = wifi_online()
@@ -241,8 +267,7 @@ def dz_xmms2():
 		color = "green"
 		color2 = "white"
 	elif r[0] == "Stopped":
-		color = ""
-		color2 = ""
+		return i("note","")
 	else:
 		color = "white"
 		color2 = ""
@@ -252,8 +277,30 @@ def dz_xmms2():
 
 	return i("note",color) +" ^fg("+color2+")"+ r[1] + " " + progress*"." + (4-progress)*" "
 
+def dz_prayer():
+	raw = next_prayer()
+	if not raw: return i("clock","")
+	#else
+	(prayer,time,delta) = raw
+	if delta < 15:
+		icolor="green"
+		color="green"
+	elif delta < 30:
+		icolor = "white"
+		color = "white"
+	elif delta  < 60:
+		icolor = "white"
+		color = ""
+	else:
+		icolor = ""
+		color = ""
+
+	return i("clock",icolor) + "^fg(%s) %s - %s (%sm)" % (color,prayer,time,delta)
 
 
-ITEMS=[("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
+if __name__ == "__main__":
+	ITEMS=[("prayer",dz_prayer,60),("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
+	dzen_go(ITEMS)
 
-dzen_go(ITEMS)
+
+
