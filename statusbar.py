@@ -281,6 +281,8 @@ def dz_prayer():
 	raw = next_prayer()
 	if not raw: return i("clock","")
 	#else
+	if len(raw) != 3: return i("clock","")
+	#else again
 	(prayer,time,delta) = raw
 	if delta < 15:
 		icolor="green"
@@ -295,7 +297,7 @@ def dz_prayer():
 		icolor = ""
 		color = ""
 
-	return i("clock",icolor) + "^fg(%s) %s - %s (%sm)" % (color,prayer,time,delta)
+	return i("clock",icolor) + "^fg(%s) %s - %s (%sm)" % (color,prayer.strip(),time.strip(),delta)
 
 
 if __name__ == "__main__":
