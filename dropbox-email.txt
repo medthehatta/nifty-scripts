@@ -1,0 +1,16 @@
+Files have been posted to the UCSC Physical Planning & Construction FTP site for your use.  They can be accessed at the following location:
+
+[[url]]
+
+Or you can log in with an FTP client using the following credentials:
+
+Host: ppc-sftp01.ucsc.edu
+User: [[user]]
+Pass: [[password]]
+Path: [[path]]
+
+We can only guarantee availability of this login for a week.  After that, the data may be purged at any time.
+
+Please let us know if you have any questions or comments.
+
+
