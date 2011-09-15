@@ -83,14 +83,18 @@ def new_mail():
 def wifi_online():
 	nic="eth0"
 	wifi="wlan0"
+	tether="easytether0"
 	rex = re.compile(r'inet addr:([^\ ]*)')
 	raw_nic = cmd([["ifconfig",nic]]).strip()
 	raw_wifi = cmd([["ifconfig",wifi]]).strip()
+	raw_et = cmd([["ifconfig",tether]]).strip()
 	m_nic = rex.search(raw_nic)
 	m_wifi = rex.search(raw_wifi)
+	m_et = rex.search(raw_et)
 	if m_nic: return (0,m_nic.groups()[0])
 	if m_wifi: return (1,m_wifi.groups()[0])
-	if not (m_nic or m_wifi): return None
+	if m_et: return (2,m_et.groups()[0])
+	if not (m_nic or m_wifi or m_et): return None
 
 def time_to_minutes(s):
 	sp = map(int, reversed( s.split(":") ))
@@ -208,6 +212,7 @@ def dz_wifi():
 	if r: 
 		if r[0]==0: return i("net_wired","green")+"^fg(white) "+r[1]
 		if r[0]==1: return i("wifi_02","green")+"^fg(white) "+r[1]
+		if r[0]==2: return i("usb_02","green")+"^fg(white) "+r[1]
 	else:
 		return "offline"
 
