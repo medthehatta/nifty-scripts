@@ -10,13 +10,36 @@ ASSIGN=`basename ${1} | cut -d'.' -f1`
 cp -r "$RSTCFG" "$TMPCONF"
 echo "latex-preamble:" >> "$TMPCONF"
 sed 's/^/\t/g' "$PREAMBLE" >> "$TMPCONF"
-CMD="python2 $RST --conf=\"$TMPCONF\" \"$ASSIGN.rst\" > \"$ASSIGN.tex\""
+CMD="python2 $RST --conf=$TMPCONF $ASSIGN.rst"
+DEST=$ASSIGN.tex
 echo $CMD
-python2 "$RST" --conf="$TMPCONF" "$ASSIGN.rst" > "$ASSIGN.tex"
-pdflatex "$ASSIGN.tex" && pdflatex "$ASSIGN.tex" && mv "$ASSIGN.pdf" "med-${ASSIGN}.pdf"
+$CMD > "$DEST"
 
+pdflatex "$ASSIGN.tex" 
 if [ $? -eq 0 ]; then
-	rm "$TMPCONF"
-	rm *.{out,log,aux}
-	rm "$ASSIGN.tex"
+	echo && echo && echo
+
+	if [ -e "$ASSIGN.sage" ]; then
+		echo "$ASSIGN.sage Found in $(pwd)."
+		sage "$ASSIGN.sage"
+	fi
+
+	if [ -n $(ls *.bib) ]; then
+		echo "Bibfile found in $(pwd)."
+		bibtex "$ASSIGN"
+		echo && echo && echo
+		pdflatex "$ASSIGN.tex"
+	fi
+
+	pdflatex "$ASSIGN.tex" && mv "$ASSIGN.pdf" "med-${ASSIGN}.pdf"
+
+	if [ $? -eq 0 ]; then
+		rm -f "$TMPCONF"
+		rm -f *.{out,log,aux}
+		rm -f *.{blg,bbl}
+		#rm -f "$ASSIGN".{sage,py,sout}
+		rm -rf sage-plots-for*
+		rm -f "$ASSIGN.tex"
+	fi
 fi
+

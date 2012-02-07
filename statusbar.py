@@ -5,60 +5,37 @@ import subprocess
 import time
 import datetime
 import shutil
+from functools import *
 
 home_dir="/home/med"
+mail_dir=home_dir+"/mail"
 icon_dir=home_dir+"/scripts/icons"
 
-#shameless hack to try and get the battery to work more accurately
-#(basically going to track all the rate measurements in a global variable
-# and average them)
-rate=[]
-
-
-
-def cmd(cmdlist):
-	if not cmdlist: return None
-
-	pipeline = reduce( \
-		lambda last, command: subprocess.Popen(command ,\
-			stdin=last.stdout,stdout=subprocess.PIPE) ,\
-		cmdlist ,\
-		subprocess.Popen("echo"))
-
-	return pipeline.communicate()[0]
-
+def cmd(c):
+	return subprocess.Popen(c,shell=False,stdout=subprocess.PIPE).communicate()[0].decode()
 
 def volume_level():
-	raw = cmd([["amixer","sget","Master"]])
+	raw = cmd(["amixer","sget","Master"])
 	rex = re.compile(r'\[([^\[\]\s]+)%\].*\[[^\[\]\s]+\].*\[([^\[\]\s]+)\]')
 	(v,m) = rex.search(raw).groups()
 	return (int(v),m=='on')
 
 
 def date():
-	return cmd([["date","+%d %b (%a) %I:%M %p"]]).strip()
+	return cmd(["date","+%d %b (%a) %I:%M %p"])
 
 
 def battery_remaining():
-	raw = open("/proc/acpi/battery/BAT0/state").readlines()
+	raw = cmd(["acpi","-b"])
 
-	rex = re.compile(r'\s+(.*)\n')
-	(P,C,S,R,L,V) =\
-		[rex.search(a).groups()[0] for a in raw if a]
-
-	rate.append(float(re.search(r'([0-9]+)',R).groups()[0]))
-	leftH = float(re.search(r'([0-9]+)',L).groups()[0])
-
-	state = re.search(r'(charged|discharging|charging)',S).groups()[0]
-
-	rateA = sum(rate)/float(len(rate))
-
-	if rateA == 0: 
-		timeleft = 0
+	percent = re.search(r'([0-9]+)\%',raw).groups()[0]
+	state = re.search(r'(Full|Discharging|Unknown|Charging)',raw).groups()[0]
+	time_p = re.search(r'([0-9]+:[0-9]+):[0-9]+',raw)
+	if time_p:
+		time = time_p.groups()[0]
 	else:
-		timeleft = leftH / rateA
-	
-	return (state,100*leftH/5053.,floor(timeleft),floor(60*(timeleft-floor(timeleft))))
+		time = None
+	return (state,int(percent),time)
 
 
 def irssi_notifications():
@@ -66,11 +43,12 @@ def irssi_notifications():
 	return [r.split("\t") for r in raw]
 
 
+def instances(rex,mailbox): 
+	return cmd(["grep",rex,mail_dir+"/"+mailbox])
+def count_instances(rex,mailbox):
+	return len( instances(rex,mailbox).split("\n") )
+
 def new_mail():
-	mail_dir=home_dir+"/mail"
-	def count_instances(rex,mailbox): 
-		return int(cmd([["grep",rex,mail_dir+"/"+mailbox],["wc","-l"]]).strip())
-	
 	mailboxes={}
 	for mailbox in [f for f in os.listdir(mail_dir) if "IN-" in f]:
 		mailboxes[mailbox] = \
@@ -84,10 +62,10 @@ def wifi_online():
 	nic="eth0"
 	wifi="wlan0"
 	tether="easytether0"
-	rex = re.compile(r'inet addr:([^\ ]*)')
-	raw_nic = cmd([["ifconfig",nic]]).strip()
-	raw_wifi = cmd([["ifconfig",wifi]]).strip()
-	raw_et = cmd([["ifconfig",tether]]).strip()
+	rex = re.compile(r'inet ([^\ ]*)')
+	raw_nic = cmd(["ifconfig",nic])
+	raw_wifi = cmd(["ifconfig",wifi])
+	raw_et = cmd(["ifconfig",tether])
 	m_nic = rex.search(raw_nic)
 	m_wifi = rex.search(raw_wifi)
 	m_et = rex.search(raw_et)
@@ -97,12 +75,12 @@ def wifi_online():
 	if not (m_nic or m_wifi or m_et): return None
 
 def time_to_minutes(s):
-	sp = map(int, reversed( s.split(":") ))
+	sp = [int(a) for a in reversed( s.split(":") )]
 	return sp[0] + sum( [60*a for a in sp[1:]] )
 
 def xmms2_status():
 	rex = re.compile(r'([A-Za-z]+): (.+): ([0-9]+:[0-9]+) of ([0-9]+:[0-9]+)')
-	raw = cmd([["nyxmms2","current"]]).strip()
+	raw = cmd(["nyxmms2","current"])
 	m = rex.search(raw)
 	if m: 
 		(status,song,current,final) = m.groups()
@@ -112,7 +90,7 @@ def xmms2_status():
 	return None
 
 def time_diff(t1,t2):
-	print "Delta t: %s - %s" % (t1,t2)
+	print("Delta t: {0} - {1}".format(t1,t2))
 	ts1 = [int(t) for t in t1.split(":")]
 	ts2 = [int(t) for t in t2.split(":")]
 	tsp1 = 60*ts1[0]+ts1[1] 
@@ -121,10 +99,10 @@ def time_diff(t1,t2):
 
 def next_prayer():
 	prayers = ["Fajr","Shorooq","Zuhr","Asr","Maghrib","Isha"]
-	times = cmd([["ipraytime","-b"],["tail","-n1"],["tr","-s"," "]]).split(" ")
+	times_line = cmd(["ipraytime","-b"]).strip().split("\n")[-1]
+	times = re.sub(r'\ +',r' ',times_line).split(" ")
 	now = datetime.datetime.today().strftime("%H:%M")
 	deltas = [time_diff(a,now) for a in times[2:]]
-
 	data = zip(prayers,times[2:],deltas)
 	next = [d for d in data if d[2]>0]
 
@@ -143,24 +121,24 @@ def next_prayer():
 def pbar(pct,color="green"):
 	filled = floor(pct/2.)	
 	unfilled = 50-filled
-	return "^fg(%s)^r(%sx6)^fg(white)^r(%sx6)" % (color,str(filled),str(unfilled))
+	return "^fg({0})^r({1}x6)^fg(white)^r({2}x6)".format(color,str(filled),str(unfilled))
 
 
 def statusbar_item(num,data):
-	return str(num)+" ^p(+5)^fg()| "+data
+	return str(num)+" ^p(+5)^fg()| "+data.strip()+"\n"
 def clear_item(num):
 	return str(num)+" "
 
 def i(icon,color=""):
 	if color:
-		return "^fg(%s)^i(%s/%s)^fg()" % (color,icon_dir,icon+".xbm")
+		return "^fg({0})^i({1}/{2})^fg()".format(color,icon_dir,icon+".xbm")
 	else:
-		return "^i(%s/%s)" % (icon_dir,icon+".xbm")
+		return "^i({0}/{1})".format(icon_dir,icon+".xbm")
 
 
 def dzen_write(data):
 	f=open("/tmp/med-status",'w')
-	print >> f, data
+	f.writelines(data)
 	f.close()
 	return data
 	
@@ -178,7 +156,7 @@ def dzen_go(items):
 
 	# First run
 	for a in names:
-		dzen_write(statusbar_item(ordering[a],apply(names[a])))
+		dzen_write(statusbar_item(ordering[a],names[a]()))
 
 	# Run at specified intervals
 	while 1==1:
@@ -186,7 +164,7 @@ def dzen_go(items):
 		counter = (counter+1) % maxcounter
 		update_keys = [k for k in interval if counter%interval[k] == 0]
 		for i in update_keys:
-			dzen_write(statusbar_item(ordering[i],apply(names[i])))
+			dzen_write(statusbar_item(ordering[i],names[i]()))
 
 
 def dzen_stop():
@@ -195,17 +173,20 @@ def dzen_stop():
 
 
 def dz_battery():
-	(state,percent,hours,minutes) = battery_remaining()
-	if state == "discharging":
+	(state,percent,time) = battery_remaining()
+	if state == "Discharging":
 		if percent >= 0: color = "red"
 		if percent > 25: color = "yellow"
 		if percent > 50: color = "green"
-		
-		return i("bat_empty_01","white")+" "+pbar(percent,color)+" %02d%% (%02d:%02d)"%(int(percent),int(hours),int(minutes))
-	if state == "charging":	
-		return i("ac","")+" "+pbar(percent,"black")+" %02d%% (--:--)" % (int(percent),)
-	if state == "charged":
-		return i("ac","")+" %02d%%" % (int(percent),)
+		return i("bat_empty_01","white")+" "+pbar(percent,color)+" {0}% ({1})".format(int(percent),time)
+	if state == "Unknown" or state == "Charging":	
+		if percent > 95:
+			return i("ac","")+" {0}%".format(int(percent),)
+		else:
+			return i("ac","")+" "+pbar(percent,"black")+" {0}% (--:--)".format(int(percent))
+	if state == "Full":
+		return i("ac","")+" {0}%".format(int(percent))
+
 
 def dz_wifi():
 	r = wifi_online()
@@ -235,9 +216,11 @@ def dz_date():
 
 def dz_mail():
 	mb = new_mail()
-	abbrevs={"IN-facebook":"fb","IN-inbox":"in","IN-testing":"x","IN-monster":"jb"}
+	abbrevs={"IN-facebook":"fb","IN-inbox":"in","IN-testing":"x","IN-monster":"jb","IN-temple":"tu"}
 	boxes = ["^fg("+((not not mb[k])*"white")+")"+abbrevs[k]+"-"+str(mb[k]) for k in sorted(mb) if k in abbrevs and mb[k]]
-	if filter(lambda x: x>0, mb.values()):
+	nonzero = [b for b in mb.keys() if mb[b]>0]
+	if [b for b in mb.keys() if mb[b]>0]:
+
 		color="green"
 		if boxes:
 			boxdisp=" "+"^p(+2)".join(boxes)
@@ -302,7 +285,7 @@ def dz_prayer():
 		icolor = ""
 		color = ""
 
-	return i("clock",icolor) + "^fg(%s) %s - %s (%sm)" % (color,prayer.strip(),time.strip(),delta)
+	return i("clock",icolor) + "^fg({0}) {1} - {2} ({3}m)".format(color,prayer.strip(),time.strip(),delta)
 
 
 if __name__ == "__main__":

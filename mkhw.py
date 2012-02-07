@@ -32,11 +32,11 @@ def doit(pdfname,semid,hwnum,title,abbrev,hwdesc,base):
 	os.chmod("upload",504)
 
 	# Make view script
-	template = "#!/bin/bash\n{} {} && {} {}"
+	template = "#!/bin/bash\n{} {} && {} {}\n\n"
 	view = template.format('/home/med/scripts/hw-builder.sh'
-				,os.path.join(path,abbrev.lower+str(hwnum)+".rst")
+				,os.path.join(path,abbrev.lower()+str(hwnum)+".rst")
 				,'mupdf'
-				,pdfname)
+				,os.path.join(path,pdfname))
 	with open("view",'w') as f: f.writelines(view)
 	os.chmod("view",504)
 

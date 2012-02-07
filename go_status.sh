@@ -3,7 +3,7 @@ BASE="/home/med/scripts"
 MULTIPLEX="${BASE}/dmplex"
 FIFO="/tmp/med-status"
 EXENAME="statusbar.py"
-STATUS="python2 ${BASE}/${EXENAME}"
+STATUS="python ${BASE}/${EXENAME}"
 LOG="status.log"
 
 if [ ! -e "${FIFO}" ]; then
