@@ -10,7 +10,7 @@ PDFPREFIX="med-"
 BASE="/home/med/class/grad/tex"
 PREAMBLE="$BASE/preamble.tex"
 RSTCFG="$BASE/rst.conf"
-RST=`which rst2latex`
+RST=`which rst2latex2`
 TEX=`which pdflatex`
 
 # -- End of Settings -- #
@@ -42,10 +42,10 @@ if [ $? -eq 0 ]; then
 	"$TEX" "$ASSIGN.tex" && mv "$ASSIGN.pdf" "${PDFPREFIX}${ASSIGN}.pdf"
 
 	if [ $? -eq 0 ]; then
-		rm -f "$TMPCONF"
-		rm -f *.{out,log,aux}
-		rm -f *.{blg,bbl}
-		rm -f "$ASSIGN.tex"
+                rm -f "$TMPCONF"
+		mv *.{log,aux,out} /tmp
+		mv *.{blg,bbl} /tmp
+		mv "$ASSIGN.tex" /tmp
 	fi
 else
 	return -1
