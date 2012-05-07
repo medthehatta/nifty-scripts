@@ -4,10 +4,7 @@ PREFIX="$@"
 EDITOR="vim"
 TERMCMD="urxvt"
 
-# Yeah yeah, this is ugly.  Deal.
-FILE="$(mktemp --tmpdir="$PREFIX")"
-mv "$FILE" "${FILE}.rst"
-FILE="${FILE}.rst"
+FILE="${PREFIX}/$(date +%m%d-%H%M%S).rst"
 
 echo "##############################" > "$FILE"
 date >> "$FILE"
