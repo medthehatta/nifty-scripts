@@ -18,10 +18,10 @@ def signed_display(i):
 def displayable(f,e):
 	f_part = str(f).replace(",","").replace("-1","-").replace("1","+").replace("0","0")
 	f_part += " (%d)" % (sum(f),)
-	e_part = " ".join( ["(%s)" % (signed_display(a),) for a in e] )
-	total  = str( sum(f)+sum(e) )
+	e_part = " ".join( [signed_display(a) for a in e] )
+	total  = sum(f) + sum(e)
 	if e_part:
-		return f_part + "  " + e_part + " = (" + total + ")"
+		return f_part + "  (" + e_part + ") = {" + signed_display(total) + "}"
 	else:
 		return f_part
 
@@ -31,7 +31,14 @@ def rollem(s):
 	return displayable(fudge,embellishments)
 
 def roll_embellished(phenny,input):
-	phenny.say( input.nick + " rolled: " + rollem(input.group(2)) )
-roll_embellished.commands=['rollc']
+	try:
+		if input.group(2):
+			result = rollem(input.group(2))
+		else:
+			result = rollem("")
+		phenny.say( input.nick + " rolled: " + result ) 
+	except Exception as e:
+		phenny.say( str(e) )
+roll_embellished.commands=['roll']
 
 
