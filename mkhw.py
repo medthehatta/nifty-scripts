@@ -72,14 +72,18 @@ def main(argv):
         # === Option Parsing ===
         p = OptionParser()	
 
+        # default semester
+        DEFSEM = "03-fall2012"
+        DEFBASE = "/home/med/school-dbox/Public/"
+
         #def doit(pdfname,semid,hwnum,title,abbrev,hwdesc,base):
         p.add_option("-c","--course",dest="abbrev",default="",help="course abbreviation")
         p.add_option("-d","--description","--desc",dest="hwdesc",default="",help="brief description of the assignment")
         p.add_option("--pdf-name",dest="pdfname",default="",help="what to name the pdf.  (default: med-xx#.pdf)")
         p.add_option("-n","--hw-number",dest="hwnum",type="int",default=0,help="ovveride the homework number")
         p.add_option("--course-title",dest="title",default="",help="alternate course title")
-        p.add_option("-s","--semester",dest="semid",default="02-spring2012",help="semester id.  (default: 02-spring2012)")
-        p.add_option("-p","--prefix",dest="base",default="/home/med/class/grad/",help="base directory for course data.  (default: ~/class/grad)")
+        p.add_option("-s","--semester",dest="semid",default=DEFSEM,help="semester id.  (default: {0})".format(DEFSEM))
+        p.add_option("-p","--prefix",dest="base",default=DEFBASE,help="base directory for course data.  (default: {0})".format(DEFBASE))
 
         (opts,args) = p.parse_args(argv)
         rest = " ".join(args)
@@ -91,7 +95,11 @@ def main(argv):
 
         if opts.hwnum < 1:
                 if os.path.isdir(os.path.join(opts.base,opts.abbrev,"homework")):
-                        hwnum = 1 + max( map(int,os.listdir(os.path.join(opts.base,opts.abbrev,"homework"))) )
+                        nums = list(map(int,os.listdir(os.path.join(opts.base,opts.abbrev,"homework"))))
+                        if nums:
+                          hwnum = 1 + max(nums) 
+                        else:
+                          hwnum = 1
                 else:
                         hwnum = 1
         else:
@@ -103,7 +111,8 @@ def main(argv):
                 pdfname = opts.pdfname
 
         if not opts.title:
-                title = {'tb':"Tissue Biomechanics", 'afd':"Fluid Dynamics", 'fe':"FEA"}[opts.abbrev.lower()]
+                tdic = {'tb':"Tissue Biomechanics", 'afd':"Fluid Dynamics", 'fe':"FEA", 'tp':"Thermodynamics", 'pde':"PDE"}
+                title = tdic[opts.abbrev.lower()]
         else:
                 title = opts.title
 
