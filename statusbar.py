@@ -112,11 +112,6 @@ def next_prayer():
 		return None
 
 
-def is_suspend_locked():
-        eeepc_var="/var/eeepc/"
-        return "power.lock" in os.listdir(eeepc_var)
-
-
 ##################################
 # FUNCTIONS FOR PRINTING TO DZEN #
 ##################################
@@ -297,7 +292,7 @@ def dz_suspend_lock():
                 return i("stop","")
 
 if __name__ == "__main__":
-	ITEMS=[("susplock",dz_suspend_lock,5),("prayer",dz_prayer,60),("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
+	ITEMS=[("prayer",dz_prayer,60),("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
 	dzen_go(ITEMS)
 
 
