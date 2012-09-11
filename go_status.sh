@@ -20,4 +20,4 @@ PID=`ps aux | grep -i ${EXENAME} | grep -v grep | gawk '{print $2}'`
 if [ -n "${PID}" ]; then
 	kill ${PID}
 fi
-$STATUS 2>"${BASE}/${LOG}" &
+exec $STATUS 2>"${BASE}/${LOG}" 
