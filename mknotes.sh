@@ -11,6 +11,9 @@ date >> "$FILE"
 echo "##############################" >> "$FILE"
 echo >> "$FILE"
 
-$TERMCMD -e $EDITOR "$FILE"
+if [ -n "$DISPLAY" ]; then
+  $TERMCMD -e $EDITOR "$FILE"
+else
+  $EDITOR "$FILE"
+fi
 
-#is that all?
