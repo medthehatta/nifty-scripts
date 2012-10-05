@@ -1,0 +1,10 @@
+#!/bin/bash
+MSGS=/tmp/msgs
+DZEN_GEOMETRY='-x 1024 -w 1280'
+
+while read INP; do
+  REP="[$(date +%H:%M:%S)]   ${INP}"
+  echo -e "${REP}" > "${MSGS}"
+  echo -e "${REP}" | dzen2 -fn cure -p 3 ${DZEN_GEOMETRY}
+done
+
