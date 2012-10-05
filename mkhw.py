@@ -33,7 +33,7 @@ def doit(pdfname,semid,hwnum,title,abbrev,hwdesc,base):
 
         # Make build and view scripts
         #build
-        template_b = "#!/bin/bash\n{} {}\n\n"
+        template_b = "#!/bin/bash\n{} {}&>_build.log&\n\n"
         build = template_b.format('/home/med/scripts/hw-builder.sh'
                                 ,os.path.join(path,abbrev.lower()+str(hwnum)+".rst"))
         with open("build",'w') as f: f.writelines(build)
@@ -74,7 +74,7 @@ def main(argv):
 
         # default semester
         DEFSEM = "03-fall2012"
-        DEFBASE = "/home/med/school-dbox/Public/"
+        DEFBASE = "/home/med/academic/Public/"
 
         #def doit(pdfname,semid,hwnum,title,abbrev,hwdesc,base):
         p.add_option("-c","--course",dest="abbrev",default="",help="course abbreviation")
