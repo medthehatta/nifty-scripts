@@ -7,7 +7,7 @@
 # -- Various Settings -- #
 
 PDFPREFIX="med-"
-BASE="/home/med/class/grad/tex"
+BASE="/home/med/academic/Public/tex"
 PREAMBLE="$BASE/preamble.tex"
 RSTCFG="$BASE/rst.conf"
 RST=`which rst2latex2`
