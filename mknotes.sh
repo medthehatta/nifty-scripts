@@ -2,18 +2,17 @@
 
 PREFIX="$@"
 EDITOR="vim"
+EDARGS="+"
 TERMCMD="urxvt"
 
 FILE="${PREFIX}/$(date +%m%d-%H%M%S).rst"
 
-echo "##############################" > "$FILE"
-date >> "$FILE"
-echo "##############################" >> "$FILE"
-echo >> "$FILE"
+echo ":Date: $(date +'%Y-%M-%d %H:%m')" >> "$FILE"
+echo -e "\n" >> "$FILE"
 
 if [ -n "$DISPLAY" ]; then
-  $TERMCMD -e $EDITOR "$FILE"
+  $TERMCMD -e $EDITOR "$EDARGS" "$FILE"
 else
-  $EDITOR "$FILE"
+  $EDITOR "$EDARGS" "$FILE"
 fi
 
