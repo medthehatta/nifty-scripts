@@ -7,8 +7,6 @@ PAGER="less"
 CAT="cat"
 
 FILES=$(find "$P" -type f | grep -iv swp | sort -r | head -n${NUM} | sort)
-$CAT ${FILES} > "${TMP}"
-
-$PAGER "${TMP}"
+$CAT ${FILES} | $PAGER
 
 
