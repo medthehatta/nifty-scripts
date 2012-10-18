@@ -7,7 +7,8 @@ TERMCMD="urxvt"
 
 FILE="${PREFIX}/$(date +%m%d-%H%M%S).rst"
 
-echo ":Date: $(date +'%Y-%M-%d %H:%m')" >> "$FILE"
+echo "########################" >> "$FILE"
+echo ":Date: $(date +'%Y-%m-%d %H:%M')" >> "$FILE"
 echo -e "\n" >> "$FILE"
 
 if [ -n "$DISPLAY" ]; then
