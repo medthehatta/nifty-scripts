@@ -63,9 +63,9 @@ def wifi_online():
 	wifi="wlan0"
 	tether="easytether0"
 	rex = re.compile(r'inet ([^\ ]*)')
-	raw_nic = cmd(["ifconfig",nic])
-	raw_wifi = cmd(["ifconfig",wifi])
-	raw_et = cmd(["ifconfig",tether])
+	raw_nic = cmd(["ip","addr","show","dev",nic])
+	raw_wifi = cmd(["ip","addr","show","dev",wifi])
+	raw_et = cmd(["ip","addr","show","dev",tether])
 	m_nic = rex.search(raw_nic)
 	m_wifi = rex.search(raw_wifi)
 	m_et = rex.search(raw_et)
@@ -110,6 +110,11 @@ def next_prayer():
 		return next[0]
 	else:
 		return None
+
+def usb_present():
+  mounts = cmd(["mount"]).strip().split("\n")
+  usbs   = [a for a in mounts if 'usb' in a]
+  return len(usbs)
 
 
 ##################################
@@ -212,6 +217,13 @@ def dz_date():
 	return "     "+date()
 
 
+def dz_usb():
+  count = usb_present()
+  if count:
+    return i("usb","green")+" {0}".format(count)
+  else:
+    return i("usb","")
+
 def dz_mail():
 	mb = new_mail()
 	abbrevs={"IN-facebook":"fb","IN-inbox":"in","IN-testing":"x","IN-monster":"jb","IN-temple":"tu"}
@@ -292,7 +304,7 @@ def dz_suspend_lock():
                 return i("stop","")
 
 if __name__ == "__main__":
-	ITEMS=[("prayer",dz_prayer,60),("xmms2",dz_xmms2,3),("mail",dz_mail,60), ("vol",dz_volume,3), ("wifi",dz_wifi,30), ("batt",dz_battery,30), ("date",dz_date,30)]
+	ITEMS=[("usb",dz_usb,60),("prayer",dz_prayer,120),("vol",dz_volume,5),("wifi",dz_wifi,60),("date",dz_date,50)]
 	dzen_go(ITEMS)
 
 
