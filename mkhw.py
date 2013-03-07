@@ -73,7 +73,7 @@ def main(argv):
         p = OptionParser()	
 
         # default semester
-        DEFSEM = "03-fall2012"
+        DEFSEM = "04-spring2013"
         DEFBASE = "/home/med/academic/Public/"
 
         #def doit(pdfname,semid,hwnum,title,abbrev,hwdesc,base):
@@ -111,7 +111,7 @@ def main(argv):
                 pdfname = opts.pdfname
 
         if not opts.title:
-                tdic = {'tb':"Tissue Biomechanics", 'afd':"Fluid Dynamics", 'fe':"FEA", 'tp':"Thermodynamics", 'pde':"PDE"}
+                tdic = {'em':"Experimental Methods"}
                 title = tdic[opts.abbrev.lower()]
         else:
                 title = opts.title
