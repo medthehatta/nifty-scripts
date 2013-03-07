@@ -1,6 +1,6 @@
 #!/bin/bash
 MSGS=/tmp/msgs
-DZEN_GEOMETRY='-x 1024 -w 1280'
+DZEN_GEOMETRY='-w 1280'
 
 while read INP; do
   REP="[$(date +%H:%M:%S)]   ${INP}"
