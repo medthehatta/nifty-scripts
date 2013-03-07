@@ -6,6 +6,7 @@ import time
 import datetime
 import shutil
 from functools import *
+import septa
 
 home_dir="/home/med"
 mail_dir=home_dir+"/mail"
@@ -90,7 +91,6 @@ def xmms2_status():
 	return None
 
 def time_diff(t1,t2):
-	print("Delta t: {0} - {1}".format(t1,t2))
 	ts1 = [int(t) for t in t1.split(":")]
 	ts2 = [int(t) for t in t2.split(":")]
 	tsp1 = 60*ts1[0]+ts1[1] 
@@ -303,8 +303,30 @@ def dz_suspend_lock():
         else:
                 return i("stop","")
 
+def dz_septa():
+  #lines = ["Chestnut Hill East", "Chestnut Hill West", "Ambler", "Conshohocken", "Main St"]
+  #lines = ["Chestnut Hill East"]
+  lines = [l.strip() for l in open("/home/med/scripts/septastop").readlines() if l.strip()]
+  out = ""
+  for l in lines:
+    (line,leave,arrive,timing) = septa.get_next("Temple U",l)[0]
+    now = datetime.datetime.today().strftime("%H:%M")
+    then = datetime.datetime.strptime(leave,"%I:%M%p").strftime("%H:%M")
+    dt = time_diff(then,now)
+    if dt < 15:
+      color = "green"
+    elif dt < 30:
+      color = "white"
+    else:
+      color = ""
+    if timing=="On time":
+      out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5} mins)\n".format(color,line,leave,arrive,timing,dt,l)
+    else:
+      out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5}+{4})\n".format(color,line,leave,arrive,timing,dt,l)
+  return out
+
 if __name__ == "__main__":
-	ITEMS=[("usb",dz_usb,60),("prayer",dz_prayer,120),("vol",dz_volume,5),("wifi",dz_wifi,60),("date",dz_date,50)]
+	ITEMS=[("septa",dz_septa,120),("usb",dz_usb,60),("prayer",dz_prayer,120),("vol",dz_volume,5),("wifi",dz_wifi,60),("date",dz_date,50)]
 	dzen_go(ITEMS)
 
 
