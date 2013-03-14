@@ -1,10 +1,11 @@
 #!/bin/bash
 MSGS=/tmp/msgs
-DZEN_GEOMETRY='-w 1280'
+DZEN_GEOMETRY='-w 1280 -h 25'
+DZEN_FONT='dejavu sans condensed'
 
 while read INP; do
   REP="[$(date +%H:%M:%S)]   ${INP}"
-  echo -e "${REP}" > "${MSGS}"
-  echo -e "${REP}" | dzen2 -fn cure -p 3 ${DZEN_GEOMETRY}
+  echo -e "${REP}" >> "${MSGS}"
+  echo -e "${REP}" | dzen2 -fn \'"${DZEN_FONT}"\' -p 3 ${DZEN_GEOMETRY}
 done
 
