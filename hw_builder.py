@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- encoding: utf-8 -*-
 """
 hw_builder.py
 
@@ -41,13 +43,13 @@ def main():
     else:
       print("RST file ambiguous.  Need to specify RST file to process.")
       print(parser.print_usage())
-      return 1
+      sys.exit(1)
 
   # Process the file
   if produce_file(rstfile,config):
-    return 0
+    sys.exit()
   else:
-    return 2
+    sys.exit(1)
 
 def produce_file(sourcefile,CONFIG):
   # Read in config
