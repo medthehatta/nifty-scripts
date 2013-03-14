@@ -10,6 +10,7 @@ Dunno why I bothered to write this.  Guess it will be easier to extend than a
 bash script?
 """
 
+import sys
 import os, os.path, shutil
 import argparse
 import subprocess
