@@ -21,6 +21,6 @@ if (( "$#" )); then
   NAME="$1"
 fi
 
-# Launch screen in the directory with the given name
-urxvt -e screen -U -d -R -S "$NAME" &
+# Launch tmux in the directory with the given name
+urxvt -e tmux new -A -s "$NAME"
 
