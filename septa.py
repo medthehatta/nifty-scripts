@@ -8,15 +8,21 @@ import urllib.request
 import argparse
 
 
-def get_next(loca,locz): 
+def get_next(loca,locz,dbg=False): 
   html  = urllib.request.urlopen("http://app.septa.org/nta/result.php?"+
                                  urllib.parse.urlencode({"loc_a":loca,
                                                          "loc_z":locz})).readall()
-  nexts = [[ll.contents for ll in l.select("td")] for 
-            l in bs4.BeautifulSoup(html).select("tr")]
+  trs = bs4.BeautifulSoup(html).select("tr")
+  nexts = [[ll.contents for ll in l.select("td")] for l in trs]
 
-  return [[line[0],leave[0],arrive[0],timing[0]] for
-            (train,line,leave,arrive,dash,timing) in nexts[1:]]
+  if dbg==True:
+    return nexts
+  else:
+    try:
+        return [[line[0],leave[0],arrive[0],timing[0]] for
+                 (train,line,leave,arrive,dash,timing) in nexts[1:]]
+    except Exception:
+        return None
 
 
 def main(argv):
@@ -41,8 +47,11 @@ def main(argv):
 
     start = lookup.get(args.loc_a.upper()) or args.loc_a
     end = lookup.get(args.loc_z.upper()) or args.loc_z
-    print('\n'.join(['  '.join([n for n in N]) for 
-      N in get_next(start,end)]))
+    result = get_next(start,end)
+    if result is not None:
+        print('\n'.join(['  '.join([n for n in N]) for N in result]))
+    else:
+        print(get_next(start,end,dbg=True))
 
 if __name__=='__main__':
 	main(sys.argv[1:])
