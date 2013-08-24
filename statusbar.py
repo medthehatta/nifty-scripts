@@ -304,25 +304,28 @@ def dz_suspend_lock():
                 return i("stop","")
 
 def dz_septa():
-  #lines = ["Chestnut Hill East", "Chestnut Hill West", "Ambler", "Conshohocken", "Main St"]
-  #lines = ["Chestnut Hill East"]
   lines = [l.strip() for l in open("/home/med/scripts/septastop").readlines() if l.strip()]
   out = ""
-  for l in lines:
-    (line,leave,arrive,timing) = septa.get_next("Temple U",l)[0]
-    now = datetime.datetime.today().strftime("%H:%M")
-    then = datetime.datetime.strptime(leave,"%I:%M%p").strftime("%H:%M")
-    dt = time_diff(then,now)
-    if dt < 15:
-      color = "green"
-    elif dt < 30:
-      color = "white"
-    else:
-      color = ""
-    if timing=="On time":
-      out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5} mins)\n".format(color,line,leave,arrive,timing,dt,l)
-    else:
-      out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5}+{4})\n".format(color,line,leave,arrive,timing,dt,l)
+  l = lines[0]
+  result = septa.get_next("Temple U",l)
+  if result is None:
+    return "(No trips available)"
+  (line,leave,arrive,timing) = septa.get_next("Temple U",l)[0]
+  now = datetime.datetime.today().strftime("%H:%M")
+  then = datetime.datetime.strptime(leave,"%I:%M%p").strftime("%H:%M")
+  dt = time_diff(then,now)
+  if dt < 7:
+    color = "red"
+  elif dt < 15:
+    color = "green"
+  elif dt < 30:
+    color = "white"
+  else:
+    color = ""
+  if timing=="On time":
+    out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5} mins)\n".format(color,line,leave,arrive,timing,dt,l)
+  else:
+    out+="^fg({0})[{6}]  {1}  {2}  {3}  ({5}+{4})\n".format(color,line,leave,arrive,timing,dt,l)
   return out
 
 if __name__ == "__main__":
