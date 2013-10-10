@@ -27,16 +27,28 @@ def date():
 
 
 def battery_remaining():
-	raw = cmd(["acpi","-b"])
+  raw = cmd(["acpitool","-B"])
 
-	percent = re.search(r'([0-9]+)\%',raw).groups()[0]
-	state = re.search(r'(Full|Discharging|Unknown|Charging)',raw).groups()[0]
-	time_p = re.search(r'([0-9]+:[0-9]+):[0-9]+',raw)
-	if time_p:
-		time = time_p.groups()[0]
-	else:
-		time = None
-	return (state,int(percent),time)
+  percent_p = re.search(r'Remaining.*, ([0-9\.]+)%',raw)
+  time_p = re.search(r'Remaining.*([0-9]+:[0-9]+):[0-9]+',raw)
+  state_p = re.search(r'Charging state.*(Full|Discharging|Unknown|Charging)',raw)
+
+  if time_p:
+    time = time_p.groups()[0]
+  else:
+    time = None
+
+  if percent_p:
+    percent = float(percent_p.groups()[0])
+  else:
+    percent = None
+
+  if state_p:
+    state = state_p.groups()[0]
+  else:
+    state = None
+
+  return (state,percent,time)
 
 
 def irssi_notifications():
@@ -60,9 +72,9 @@ def new_mail():
 
 
 def wifi_online():
-	nic="eth0"
-	wifi="wlan0"
-	tether="easytether0"
+	nic="enp1s0"
+	wifi="wlp2s0"
+	tether="enp0s"
 	rex = re.compile(r'inet ([^\ ]*)')
 	raw_nic = cmd(["ip","addr","show","dev",nic])
 	raw_wifi = cmd(["ip","addr","show","dev",wifi])
@@ -326,7 +338,7 @@ def dz_septa():
   return out
 
 if __name__ == "__main__":
-	ITEMS=[("septa",dz_septa,120),("usb",dz_usb,60),("prayer",dz_prayer,120),("vol",dz_volume,5),("wifi",dz_wifi,60),("date",dz_date,50)]
+	ITEMS=[("usb",dz_usb,60),("prayer",dz_prayer,120),("vol",dz_volume,5),("wifi",dz_wifi,60),("batt",dz_battery,60),("date",dz_date,50)]
 	dzen_go(ITEMS)
 
 
