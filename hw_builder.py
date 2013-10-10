@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 """
 hw_builder.py
@@ -19,7 +19,7 @@ from docutils.core import publish_file
 
 
 # Setting defaults
-DEFAULT_CONFIG = '/home/med/academic/Public/tex/hw_builder.conf'
+DEFAULT_CONFIG = '/home/med/academic/tex/hw_builder.conf'
 
 def rewrite(basename,rule,ext='pdf'):
   """Rewrite the base name.  Need more options someday."""
