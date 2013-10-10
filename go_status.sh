@@ -3,7 +3,7 @@ BASE="/home/med/scripts"
 MULTIPLEX="${BASE}/dmplex"
 FIFO="/tmp/med-status"
 EXENAME="statusbar.py"
-STATUS="python ${BASE}/${EXENAME}"
+STATUS="python3 ${BASE}/${EXENAME}"
 LOG="status.log"
 FONT="cure"
 
